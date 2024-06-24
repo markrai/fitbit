@@ -34,6 +34,14 @@ weekly_avg['day_name'] = weekly_avg['day_of_week'].apply(
     lambda x: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][x]
 )
 
+# Sort the weekly_avg dataframe from most stressful to least stressful
+weekly_avg = weekly_avg.sort_values(by='low_frequency', ascending=False).reset_index(drop=True)
+
+# Set day_name as a categorical type with the sorted order
+weekly_avg['day_name'] = pd.Categorical(weekly_avg['day_name'], 
+                                        categories=weekly_avg['day_name'], 
+                                        ordered=True)
+
 # Create a 'month_year' column for the monthly_avg dataframe for better plotting
 monthly_avg['month_year'] = monthly_avg.apply(lambda x: f"{int(x['month']):02d}/{str(int(x['year']))[2:]}", axis=1)
 
@@ -114,9 +122,9 @@ plt.grid(axis='y')
 plt.tight_layout()
 plt.show()
 
-# Heatmap of average stress level by day of the week
+# Heatmap of average stress level by day of the week, sorted
 plt.figure(figsize=(10, 5))
-day_avg_matrix = weekly_avg.pivot_table(index='day_name', values='low_frequency')
+day_avg_matrix = weekly_avg.pivot_table(index='day_name', values='low_frequency', observed=False)
 sns.heatmap(day_avg_matrix, annot=True, cmap='coolwarm', fmt=".2f")
 plt.title('Heatmap of Average Stress Level by Day of the Week')
 plt.xlabel('Day of the Week')
